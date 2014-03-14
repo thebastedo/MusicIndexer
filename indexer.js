@@ -4,7 +4,8 @@ var fs 		= require('fs');
 		http 	= require('http');
 
 //var _path = '/Users/justinbastedo/Desktop/testMusic';
-var _path = '/Volumes/External/CLEANED_MUSIC';
+//var _path = '/Volumes/External/CLEANED_MUSIC';
+var _path = '/Volumes/External/INCOMPLETE_MUSIC';
 
 var _ignore = ['.DS_Store'];
 
@@ -131,16 +132,7 @@ var addSong = function(song) {
 			//console.log("Post completed for " + song.path );
 			process.stdout.write('.');
 			addedCount++;
-			var nextSong = id3s.shift();
-
-			if (nextSong) {
-				setTimeout(function() { addSong(makeSong(nextSong)); }, 500);
-			} else { 
-				process.stdout.write('\n');
-				elapsed_time("Added all id3s we found!");
-				console.log("Posted " + addedCount + " to the api");
-				console.log(addedErrors.length + " posts failed");
-			}
+			addNextSong();
 		});
 	});
 	
@@ -149,17 +141,22 @@ var addSong = function(song) {
 	pst.on('error', function(e) {
 		console.log("HTTP Write error.");
 		console.log(e);
-			var nextSong = id3s.shift();
-
-			if (nextSong) {
-				setTimeout(function() { addSong(makeSong(nextSong)); }, 500);
-			} else { 
-				process.stdout.write('\n');
-				elapsed_time("Added all id3s we found!");
-				console.log("Posted " + addedCount + " to the api");
-				console.log(addedErrors.length + " posts failed");
-			}
+		addedErrors.push(song);
+		addNextSong();
 	});
+}
+
+var addNextSong = function() {
+	var nextSong = id3s.shift();
+
+	if (nextSong) {
+		setTimeout(function() { addSong(makeSong(nextSong)); }, 50);
+	} else { 
+		process.stdout.write('\n');
+		elapsed_time("Added all id3s we found!");
+		console.log("Posted " + addedCount + " to the api");
+		console.log(addedErrors.length + " posts failed");
+	}
 }
 
 var makeSong = function(data) {

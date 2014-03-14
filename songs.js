@@ -40,9 +40,31 @@ exports.getSong = function(req,res) {
 
 exports.getAll = function(req,res) {
 	db.collection('songs', function(err,collection) {
-		collection.find().toArray(function(e,items) {
-			res.send(items);
+		var page = (parseInt(req.query.p) || 0);
+		var opts = {};
+		opts.limit = 1000;
+		opts.skip = page * opts.limit;
+
+		collection.count(function(er,count) {
+			var totalPages = Math.ceil(count/opts.limit);
+
+			var resp = {
+				'paging': {'total': totalPages}
+			};
+
+			if (page+1 < totalPages) {
+				resp.paging.next = 'http://localhost:3000/songs?p=' + (page+1);
+			}
+			if (page-1 > -1) {
+				resp.paging.prev = 'http://localhost:3000/songs?p=' + (page-1);
+			}
+
+			collection.find({},opts).toArray(function(e,items) {
+				resp.songs = items
+				res.send(resp);
+			});
 		});
+
 	});
 };
 
