@@ -49,7 +49,7 @@ exports.getAll = function(req,res) {
 			var totalPages = Math.ceil(count/opts.limit);
 
 			var resp = {
-				'paging': {'total': totalPages}
+				'paging': {'total': totalPages,'totalSongs':count}
 			};
 
 			if (page+1 < totalPages) {
