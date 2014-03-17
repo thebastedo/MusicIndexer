@@ -1,5 +1,6 @@
 var express = require('express');
 		songs		= require('./songs');
+		artists	= require('./artists');
 
 var app = express();
 
@@ -30,7 +31,11 @@ app.delete('/songs/:id', songs.delete);
 /*
  * Artists Methods
  */
-
+app.get('/artists', artists.getAll);
+app.get('/artists/:id', artists.getArtist);
+app.post('/artists', artists.add);
+app.put('/artists/:id', artists.update)
+app.delete('/artists/:id', artists.delete);
 
 /*
  * Album Methods

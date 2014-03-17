@@ -21,13 +21,30 @@ exports.add = function(req,res) {
 	db.collection('songs', function(err,collection) {
 		collection.insert(song, {safe:true}, function(e,result) {
 			if (err || result === undefined) { res.send({'error':'insert failed','message':e}); }
-			else { res.send(result[0]); }
+			else { res.send(JSON.stringify(result)); }
 		});
 	});
 };
 
 exports.update = function(req,res) {
-
+	var id = req.params.id;
+	var song = req.body;
+	db.collection('songs',function(err,collection) {
+		if (err) {
+			console.log("Update Song - ERROR A!");
+			console.log(err);
+		} else {
+			collection.update({'_id': new BSON.ObjectID(id)}, song, {safe:true},
+				function(err,result) {
+					if (err) {
+						console.log("Update Song - ERROR B!");
+						console.log(err);
+					} else {
+						res.send(song);
+					}
+				});
+		}
+	});
 };
 
 exports.delete = function(req,res) {
