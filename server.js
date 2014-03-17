@@ -1,6 +1,8 @@
 var express = require('express');
 		songs		= require('./songs');
 		artists	= require('./artists');
+		albums	= require('./albums');
+		genres	= require('./genres');
 
 var app = express();
 
@@ -40,10 +42,14 @@ app.delete('/artists/:id', artists.delete);
 /*
  * Album Methods
  */
+app.get('/albums', albums.getAll);
+app.post('/albums', albums.add);
 
 /*
  * Genre Methods
  */
+app.get('/genres', genres.getAll);
+app.post('/genres', genres.add);
 
 /*
  * Listen!

@@ -4,8 +4,8 @@ var fs 		= require('fs');
 		http 	= require('http');
 
 //var _path = '/Users/justinbastedo/Desktop/testMusic';
-//var _path = '/Volumes/External/CLEANED_MUSIC';
-var _path = '/Volumes/External/INCOMPLETE_MUSIC';
+var _path = '/Volumes/External/CLEANED_MUSIC';
+//var _path = '/Volumes/External/INCOMPLETE_MUSIC';
 
 var _ignore = ['.DS_Store'];
 
@@ -113,45 +113,23 @@ var scanFile = function(f) {
 var addedCount = 0;
 var addedErrors = [];
 
+/*
+ * Songs Functions
+ */
 var addSong = function(song) {
 	if (song == null) { 
 		console.log("Null Song...");
 		addNextSong();
 	} else {
-		sng = JSON.stringify(song);
-	
-		var hdrs = {
-			'Content-Type': 'application/json',
-			'Content-Length': Buffer.byteLength(sng, 'utf8')
-		};
-
-		var opts = {
-			host: 'localhost',
-			port: 3000,
-			path: '/songs',
-			method: 'POST',
-			headers: hdrs
-		};
-
-		var pst = http.request(opts, function(res) {
-			res.on('data', function(d) {
-				//console.log("Post completed for " + song.path );
+		postData('/songs',song,
+			function(data) {
 				process.stdout.write('.');
 				addedCount++;
 				addNextSong();
+			},
+			function(fail) {
+				setTimeout(function() { addSong(song); }, 10000);
 			});
-		});
-	
-		pst.write(sng);
-		pst.end();
-		pst.on('error', function(e) {
-			console.log("HTTP Write error.");
-			console.log(e);
-			console.log(song);
-			addedErrors.push(song);
-			//id3s.push(song);
-			setTimeout(function() { addSong(song); }, 10000);
-		});
 	}
 }
 
@@ -181,6 +159,12 @@ var makeSong = function(data) {
 		if (artists.indexOf(data.metadata.artist) == -1) {
 			artists.push(data.metadata.artist);
 		}
+		if (albums.indexOf(data.metadata.album) == -1) {
+			albums.push(data.metadata.album);
+		}
+		if (genres.indexOf(data.metadata.genre) == -1) {
+			genres.push(data.metadata.genre);
+		}
 
 		return {
 			'path': data.file,
@@ -209,59 +193,32 @@ var makeSong = function(data) {
 
 var artists = [];
 
-var addArtists = function(artists) {
-	if (artists == null || artists.length == 0) { 
+var addArtists = function(artist) {
+	if (artist == null || artist.length == 0) { 
 		console.log("Null Artist...");
 		addNextArtists();
 	} else {
-		arts = JSON.stringify(artists);
-	
-		var hdrs = {
-			'Content-Type': 'application/json',
-			'Content-Length': Buffer.byteLength(arts, 'utf8')
-		};
-
-		var opts = {
-			host: 'localhost',
-			port: 3000,
-			path: '/artists',
-			method: 'POST',
-			headers: hdrs
-		};
-
-		var pst = http.request(opts, function(res) {
-			res.on('data', function(d) {
+		postData('/artists',artist,
+			function(data) {
 				process.stdout.write('.');
-				addNextArtists();
+				addNextAlbums();
+			},
+			function(fail) {
+				setTimeout(function() { addArtists(artist); }, 10000);
 			});
-		});
-	
-		pst.write(arts);
-		pst.end();
-		pst.on('error', function(e) {
-			console.log("HTTP Write error.");
-			console.log(e);
-			console.log(song);
-			addedErrors.push(song);
-			//id3s.push(song);
-			setTimeout(function() { addArtists(arts); }, 10000);
-		});
 	}
 }
 
 var addNextArtists = function() {
-	var next  = [];
-	for (var i=0; i < 51; i++) {
-		if (artists.length > 0) {
-			next.push({artist: artists.shift()});
-		}
-	}
+	var next  = getNextBatch('artist',artists,50);
 	
 	if (next.length > 0) {
 		addArtists(next);
 	} else {
 		process.stdout.write('\n');
 		elapsed_time("Artists added!");
+		console.log("Adding Albums... " + albums.length);
+		addNextAlbums();
 	}
 }
 
@@ -275,51 +232,26 @@ var addAlbums = function(album) {
 		console.log("Null Album...");
 		addNextAlbums();
 	} else {
-		albms = JSON.stringify(album);
-	
-		var hdrs = {
-			'Content-Type': 'application/json',
-			'Content-Length': Buffer.byteLength(albms, 'utf8')
-		};
-
-		var opts = {
-			host: 'localhost',
-			port: 3000,
-			path: '/albums',
-			method: 'POST',
-			headers: hdrs
-		};
-
-		var pst = http.request(opts, function(res) {
-			res.on('data', function(d) {
-				process.stdout.write('.');
-				addNextAlbums();
-			});
-		});
-	
-		pst.write(albms);
-		pst.end();
-		pst.on('error', function(e) {
-			console.log("HTTP Write error.");
-			console.log(e);
-			setTimeout(function() { addAlbums(albms); }, 10000);
+		postData('/albums',album, function(data) {
+			process.stdout.write('.');
+			addNextAlbums(); 
+		},
+		function(fail) {
+			setTimeout(function() { addAlbums(album); }, 10000);
 		});
 	}
 }
 
 var addNextAlbums = function() {
-	var next = [];
-	for (var i=0; i < 51; i++) {
-		if (albums.length > 0) {
-			next.push({album: albums.shift()});
-		}
-	}
+	var next = getNextBatch('album',albums,50);
 
 	if (next.length > 0) {
 		addAlbums(next);
 	} else {
 		process.stdout.write('\n');
 		elapsed_time("Albums added!");
+		console.log("Adding Genres..." + genres.length);
+		addNextGenres();
 	}
 }
 
@@ -332,7 +264,7 @@ var addGenres = function(genre) {
 	postData('/genres',genre,
 		function(data) {
 			process.stdout.write('.');
-			addNextGeneres();
+			addNextGenres();
 		},
 		function(fail) {
 			setTimeout(function() { addGeners(genre); }, 10000);
@@ -341,7 +273,7 @@ var addGenres = function(genre) {
 }
 
 var addNextGenres = function() {
-	var next = getNextBatch(genres,50);
+	var next = getNextBatch('genre',genres,50);
 	
 	if(next.length > 0) {
 		addGenres(next);
@@ -353,17 +285,19 @@ var addNextGenres = function() {
 
 /*
  * Misc Functions
-var getNextBatch = function(dataSet,size) {
+ */
+var getNextBatch = function(label,dataSet,size) {
 	var returnSet = [];
 	for (var i=0; i < (size+1); i++) {
 		if (dataSet.length > 0) {
-			returnSet.push(dataSet.shift());
+			var obj = {};
+			obj[label] = dataSet.shift();
+			returnSet.push(obj);
 		}
 	}
 	return returnSet;
 }
 
- */
 var postData = function(path,data,callback,failfunc) {
 	// Make our data ready to post
 	var pdata = JSON.stringify(data);	
