@@ -3,9 +3,9 @@ var fs 		= require('fs');
 		probe	= require('node-ffprobe');
 		http 	= require('http');
 
-var _path = '/Users/justinbastedo/Desktop/testMusic';
+//var _path = '/Users/justinbastedo/Desktop/testMusic';
 //var _path = '/Volumes/External/CLEANED_MUSIC';
-//var _path = '/Volumes/External/INCOMPLETE_MUSIC';
+var _path = '/Volumes/External/INCOMPLETE_MUSIC';
 
 var _ignore = ['.DS_Store'];
 
@@ -156,11 +156,16 @@ var addSong = function(song) {
 }
 
 var addNextSong = function() {
-	var nextSong = id3s.shift();
-
-	if (nextSong) {
-		addSong(makeSong(nextSong));
-		//setTimeout(function() { addSong(makeSong(nextSong)); }, 50);
+	//var nextSong = id3s.shift();
+	var next  = [];
+	for (var i=0; i < 51; i++) {
+		if (id3s.length > 0) {
+			next.push(makeSong(id3s.shift()));
+		}
+	}
+	
+	if (next.length > 0) {
+		addSong(next);
 	} else { 
 		process.stdout.write('\n');
 		elapsed_time("Added all id3s we found!");
@@ -227,7 +232,6 @@ var addArtists = function(artists) {
 			});
 		});
 	
-		console.log("POSTING: " + arts);
 		pst.write(arts);
 		pst.end();
 		pst.on('error', function(e) {
@@ -252,7 +256,8 @@ var addNextArtists = function() {
 	if (next.length > 0) {
 		addArtists(next);
 	} else {
-		console.log("Artists added!");
+		process.stdout.write('\n');
+		elapsed_time("Artists added!");
 	}
 }
 
