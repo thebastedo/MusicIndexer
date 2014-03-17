@@ -203,6 +203,10 @@ var makeSong = function(data) {
 	}
 }
 
+/*
+ * Artists Functions
+ */
+
 var artists = [];
 
 var addArtists = function(artists) {
@@ -259,6 +263,142 @@ var addNextArtists = function() {
 		process.stdout.write('\n');
 		elapsed_time("Artists added!");
 	}
+}
+
+/*
+ * Albums Functions
+ */
+var albums = [];
+
+var addAlbums = function(album) {
+	if (album == null || album.length == 0) { 
+		console.log("Null Album...");
+		addNextAlbums();
+	} else {
+		albms = JSON.stringify(album);
+	
+		var hdrs = {
+			'Content-Type': 'application/json',
+			'Content-Length': Buffer.byteLength(albms, 'utf8')
+		};
+
+		var opts = {
+			host: 'localhost',
+			port: 3000,
+			path: '/albums',
+			method: 'POST',
+			headers: hdrs
+		};
+
+		var pst = http.request(opts, function(res) {
+			res.on('data', function(d) {
+				process.stdout.write('.');
+				addNextAlbums();
+			});
+		});
+	
+		pst.write(albms);
+		pst.end();
+		pst.on('error', function(e) {
+			console.log("HTTP Write error.");
+			console.log(e);
+			setTimeout(function() { addAlbums(albms); }, 10000);
+		});
+	}
+}
+
+var addNextAlbums = function() {
+	var next = [];
+	for (var i=0; i < 51; i++) {
+		if (albums.length > 0) {
+			next.push({album: albums.shift()});
+		}
+	}
+
+	if (next.length > 0) {
+		addAlbums(next);
+	} else {
+		process.stdout.write('\n');
+		elapsed_time("Albums added!");
+	}
+}
+
+/*
+ * Genre Functions
+ */
+var genres = [];
+
+var addGenres = function(genre) {
+	postData('/genres',genre,
+		function(data) {
+			process.stdout.write('.');
+			addNextGeneres();
+		},
+		function(fail) {
+			setTimeout(function() { addGeners(genre); }, 10000);
+		}
+	);
+}
+
+var addNextGenres = function() {
+	var next = getNextBatch(genres,50);
+	
+	if(next.length > 0) {
+		addGenres(next);
+	} else {
+		process.stdout.write('\n');
+		elapsed_time("Genres Added!");
+	}
+}
+
+/*
+ * Misc Functions
+var getNextBatch = function(dataSet,size) {
+	var returnSet = [];
+	for (var i=0; i < (size+1); i++) {
+		if (dataSet.length > 0) {
+			returnSet.push(dataSet.shift());
+		}
+	}
+	return returnSet;
+}
+
+ */
+var postData = function(path,data,callback,failfunc) {
+	// Make our data ready to post
+	var pdata = JSON.stringify(data);	
+
+	// Set some headers
+	var hdrs = {
+		'Content-Type': 'application/json',
+		'Content-Length': Buffer.byteLength(pdata, 'utf8')
+	};
+
+	// set our post options
+	var opts = {
+		host: 'localhost',
+		port: 3000,
+		path: path,
+		method: 'POST',
+		headers: hdrs
+	};
+
+	// create the http object
+	var pst = http.request(opts, function(res) {
+		res.on('data', function(d) {
+			callback(d);
+		});
+	});
+	
+	pst.write(pdata);
+	pst.end();
+	pst.on('error', function(e) {
+		process.stdout.write('\n');
+		console.log("HTTP Write error.");
+		console.log(e);
+		process.stdout.write('\n');
+		setTimeout(function() { failfunc(data); }, 10000);
+	});
 }
 
 console.log("Finding all files...");
