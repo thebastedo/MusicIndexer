@@ -7,12 +7,15 @@ db = new Db('music', server)
 
 db.open(function(err,db) {
 	if (err) { throw err; }
-	db.collection('albums', {strict:true}, function(err,collection){
-		if (err) {
-			db.ensureIndex('albums', {album:1}, {unique:true, background:true}, function(err,index) {
-				console.log("Created index: " + index);
-			});
-		}
+	db.authenticate(process.env.OPENSHIFT_MONGODB_DB_USERNAME, process.env.OPENSHIFT_MONGODB_DB_PASSWORD, {authdb: "admin"}, function(err,res){
+		if (err) { throw err };
+		db.collection('albums', {strict:true}, function(err,collection){
+			if (err) {
+				db.ensureIndex('albums', {album:1}, {unique:true, background:true}, function(err,index) {
+					console.log("Created index: " + index);
+				});
+			}
+		});
 	});
 });
 

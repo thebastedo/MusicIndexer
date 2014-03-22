@@ -7,12 +7,15 @@ db = new Db('music', server)
 
 db.open(function(err,db) {
 	if (err) { throw err; }
-	db.collection('artists', {strict:true}, function(err,collection){
-		if (err) {
-			db.ensureIndex('artists', {artist:1}, {unique:true, background:true}, function(err,index) {
-				console.log("Created index: " + index);
-			});
-		}
+	db.authenticate(process.env.OPENSHIFT_MONGODB_DB_USERNAME, process.env.OPENSHIFT_MONGODB_DB_PASSWORD, {authdb: "admin"}, function(err,res){
+		if (err) { throw err };
+		db.collection('artists', {strict:true}, function(err,collection){
+			if (err) {
+				db.ensureIndex('artists', {artist:1}, {unique:true, background:true}, function(err,index) {
+					console.log("Created index: " + index);
+				});
+			}
+		});
 	});
 });
 
@@ -32,7 +35,7 @@ exports.add = function(req,res) {
 }
 
 exports.update = function(req,res) {
-
+curl -i -X POST -H 'Content-Type: application/json' -d '{"name": "New Wine", "year": "2009"}' http://music-thebastedo.rhcloud.com/albums
 }
 
 exports.delete = function(req,res) {
