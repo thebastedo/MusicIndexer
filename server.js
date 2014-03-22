@@ -1,3 +1,4 @@
+#!/bin/env node
 var express = require('express');
 		songs		= require('./songs');
 		artists	= require('./artists');
@@ -61,5 +62,15 @@ app.post('/genres', genres.add);
 /*
  * Listen!
  */
-console.log("Listening on 127.0.0.1 on port 3000");
-app.listen(3000,"127.0.0.1");
+var ipaddress = process.env.OPENSHIFT_NODEJS_IP;
+var port = process.env.OPENSHIFT_NODEJS_PORT || 8080;
+
+if (typeof ipaddress === "undefined") {
+	//  Log errors on OpenShift but continue w/ 127.0.0.1 - this
+	//  allows us to run/test the app locally.
+	console.warn('No OPENSHIFT_NODEJS_IP var, using 127.0.0.1');
+	ipaddress = "127.0.0.1";
+};
+
+console.log("Listening on " + ipaddress + " on port " + port);
+app.listen(port,ipaddress);
