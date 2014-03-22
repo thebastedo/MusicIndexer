@@ -39,7 +39,7 @@ exports.update = function(req,res) {
 
 exports.getAll = function(req,res) {
 	db.collection('genres',function(err,collection) {
-		collection.find().toArray(function(e,results) {
+		collection.find().sort({genre:1}).toArray(function(e,results) {
 			if (e) { throw e; }
 			else { res.send(results); }
 		});

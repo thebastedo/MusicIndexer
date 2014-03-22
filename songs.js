@@ -10,7 +10,6 @@ db.open(function(err,db) {
 	db.collection('songs', {strict:true}, function(err,collection){
 		if (err) {
 			db.ensureIndex('songs', {path:1}, {unique:true, background:true}, function(err,index) {
-				//console.log("Created index: " + index);
 			});
 		}
 	});

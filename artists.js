@@ -21,6 +21,8 @@ exports.add = function(req,res) {
 	db.collection('artists', function(err,collection) {
 		collection.insert(artist, {safe:true}, function(e,result) {
 			if (err || result === undefined) { 
+				console.log("ERROR!!!!");
+				console.log(err);
 				res.send({'error':'insert failed','message':e}); 
 			} else { 
 				res.send(JSON.stringify(result)); 
@@ -45,8 +47,11 @@ exports.getAll = function(req,res) {
 	db.collection('artists',function(err,collection) {
 		if (err) { throw err; }
 		
-		collection.find().toArray(function(e,artists) {
-			res.send(artists);
+		collection.find().sort({artist: 1}).toArray(function(e,artists) {
+				collection.count(function(er,count) {
+					var result = { paging: { totalArtists: count }, artists: artists};
+					res.send(JSON.stringify(result)); 
+			});
 		});
 	});
 }

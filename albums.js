@@ -31,7 +31,7 @@ exports.add = function(req,res) {
 
 exports.getAll = function(req,res) {
 	db.collection('albums',function(err,collection) {
-		collection.find().toArray(function(e,results) {
+		collection.find().sort({album:1}).toArray(function(e,results) {
 			if (e) { throw e; }
 			else { res.send(results); }
 		});

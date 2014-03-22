@@ -4,8 +4,9 @@ var fs 		= require('fs');
 		http 	= require('http');
 
 //var _path = '/Users/justinbastedo/Desktop/testMusic';
-var _path = '/Volumes/External/CLEANED_MUSIC';
+//var _path = '/Volumes/External/CLEANED_MUSIC';
 //var _path = '/Volumes/External/INCOMPLETE_MUSIC';
+var _path = '/Volumes/External/Music';
 
 var _ignore = ['.DS_Store'];
 
@@ -135,6 +136,7 @@ var addSong = function(song) {
 
 var addNextSong = function() {
 	//var nextSong = id3s.shift();
+	console.log(id3s.length);
 	var next  = [];
 	for (var i=0; i < 51; i++) {
 		if (id3s.length > 0) {
@@ -149,12 +151,15 @@ var addNextSong = function() {
 		elapsed_time("Added all id3s we found!");
 		console.log("Posted " + addedCount + " to the api");
 		console.log(addedErrors.length + " posts failed");
-		console.log("Adding artists...");
+		console.log("Adding artists... " + artists.length);
 		addNextArtists();
 	}
 }
 
+var makeCount = 0;
+
 var makeSong = function(data) {
+	makeCount++;
 	if (data.metadata) {
 		if (artists.indexOf(data.metadata.artist) == -1) {
 			artists.push(data.metadata.artist);
@@ -201,7 +206,7 @@ var addArtists = function(artist) {
 		postData('/artists',artist,
 			function(data) {
 				process.stdout.write('.');
-				addNextAlbums();
+				addNextArtists();
 			},
 			function(fail) {
 				setTimeout(function() { addArtists(artist); }, 10000);

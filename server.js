@@ -21,6 +21,13 @@ app.configure(function() {
 });
 
 /*
+ * Root Methods
+ */
+app.get('/', function(req,res) {
+	res.send("Music API Docs coming, maybe...");
+});
+
+/*
  * Song Methods
  */
 app.get('/lookupByPath', songs.lookupByPath);
