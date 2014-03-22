@@ -72,10 +72,10 @@ exports.getAll = function(req,res) {
 			};
 
 			if (page+1 < totalPages) {
-				resp.paging.next = 'http://localhost:3000/songs?p=' + (page+1);
+				resp.paging.next = 'http://music-thebastedo.rhcloud.com/songs?p=' + (page+1);
 			}
 			if (page-1 > -1) {
-				resp.paging.prev = 'http://localhost:3000/songs?p=' + (page-1);
+				resp.paging.prev = 'http://music-thebastedo.rhcloud.com/songs?p=' + (page-1);
 			}
 
 			collection.find({},opts).toArray(function(e,items) {

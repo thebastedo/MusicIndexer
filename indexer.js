@@ -3,10 +3,10 @@ var fs 		= require('fs');
 		probe	= require('node-ffprobe');
 		http 	= require('http');
 
-var _path = '/Users/justinbastedo/Desktop/testMusic';
+//var _path = '/Users/justinbastedo/Desktop/testMusic';
 //var _path = '/Volumes/External/CLEANED_MUSIC';
 //var _path = '/Volumes/External/INCOMPLETE_MUSIC';
-//var _path = '/Volumes/External/Music';
+var _path = '/Volumes/External/Music';
 
 var _ignore = ['.DS_Store'];
 
@@ -117,6 +117,8 @@ var addedErrors = [];
 /*
  * Songs Functions
  */
+var songsMovedOn = false;
+
 var addSong = function(song) {
 	if (song == null) { 
 		console.log("Null Song...");
@@ -135,31 +137,26 @@ var addSong = function(song) {
 }
 
 var addNextSong = function() {
-	//var nextSong = id3s.shift();
-	console.log(id3s.length);
-	var next  = [];
-	for (var i=0; i < 51; i++) {
-		if (id3s.length > 0) {
+	if (id3s.length !== 0) {
+		var next  = [];
+		while (id3s.length > 0 && next.length !== 50) {
 			next.push(makeSong(id3s.shift()));
 		}
-	}
-	
-	if (next.length > 0) {
 		addSong(next);
 	} else { 
-		process.stdout.write('\n');
-		elapsed_time("Added all id3s we found!");
-		console.log("Posted " + addedCount + " to the api");
-		console.log(addedErrors.length + " posts failed");
-		console.log("Adding artists... " + artists.length);
-		addNextArtists();
+		if (!songsMovedOn) {
+			songsMovedOn = true;
+			process.stdout.write('\n');
+			elapsed_time("Added all id3s we found!");
+			console.log("Posted " + addedCount + " to the api");
+			console.log(addedErrors.length + " posts failed");
+			console.log("Adding artists... " + artists.length);
+			addNextArtists();
+		}
 	}
 }
 
-var makeCount = 0;
-
 var makeSong = function(data) {
-	makeCount++;
 	if (data.metadata) {
 		if (artists.indexOf(data.metadata.artist) == -1) {
 			artists.push(data.metadata.artist);
@@ -195,7 +192,7 @@ var makeSong = function(data) {
 /*
  * Artists Functions
  */
-
+var artistsMovedOn = false;
 var artists = [];
 
 var addArtists = function(artist) {
@@ -220,16 +217,20 @@ var addNextArtists = function() {
 	if (next.length > 0) {
 		addArtists(next);
 	} else {
-		process.stdout.write('\n');
-		elapsed_time("Artists added!");
-		console.log("Adding Albums... " + albums.length);
-		addNextAlbums();
+		if (!artistsMovedOn) {
+			artistsMovedOn = true;
+			process.stdout.write('\n');
+			elapsed_time("Artists added!");
+			console.log("Adding Albums... " + albums.length);
+			addNextAlbums();
+		}
 	}
 }
 
 /*
  * Albums Functions
  */
+var albumsMovedOn = false;
 var albums = [];
 
 var addAlbums = function(album) {
@@ -253,16 +254,20 @@ var addNextAlbums = function() {
 	if (next.length > 0) {
 		addAlbums(next);
 	} else {
-		process.stdout.write('\n');
-		elapsed_time("Albums added!");
-		console.log("Adding Genres..." + genres.length);
-		addNextGenres();
+		if (!albumsMovedOn) {
+			albumsMovedOn = true;
+			process.stdout.write('\n');
+			elapsed_time("Albums added!");
+			console.log("Adding Genres..." + genres.length);
+			addNextGenres();
+		}
 	}
 }
 
 /*
  * Genre Functions
  */
+var genresMovedOn = false;
 var genres = [];
 
 var addGenres = function(genre) {
@@ -293,12 +298,10 @@ var addNextGenres = function() {
  */
 var getNextBatch = function(label,dataSet,size) {
 	var returnSet = [];
-	for (var i=0; i < (size+1); i++) {
-		if (dataSet.length > 0) {
-			var obj = {};
-			obj[label] = dataSet.shift();
-			returnSet.push(obj);
-		}
+	while (dataSet.length > 0 && returnSet.length !== size) {
+		var obj = {};
+		obj[label] = dataSet.shift();
+		returnSet.push(obj);
 	}
 	return returnSet;
 }
