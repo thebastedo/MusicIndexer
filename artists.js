@@ -35,7 +35,7 @@ exports.add = function(req,res) {
 }
 
 exports.update = function(req,res) {
-curl -i -X POST -H 'Content-Type: application/json' -d '{"name": "New Wine", "year": "2009"}' http://music-thebastedo.rhcloud.com/albums
+
 }
 
 exports.delete = function(req,res) {
