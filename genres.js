@@ -2,8 +2,8 @@ var Server	= require('mongodb').Server;
 		Db 			= require('mongodb').Db;
 		BSON		= require('mongodb').BSONPure;
 
-var server = new Server('localhost', 27017, {auto_reconnect: true});
-db = new Db('musicData', server)
+var server = new Server(process.env.OPENSHIFT_MONGODB_DB_HOST, parseInt(process.env.OPENSHIFT_MONGODB_DB_PORT), {auto_reconnect: true});
+db = new Db('music', server)
 
 db.open(function(err,db) {
 	if (err) { throw err; }
