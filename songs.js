@@ -61,10 +61,18 @@ exports.getAll = function(req,res) {
 			};
 
 			if (page+1 < totalPages) {
-				resp.paging.next = 'http://localhost:3000/songs?p=' + (page+1);
+				if (req.host == 'localhost') {
+					resp.paging.next = 'http://localhost:3000/songs?p=' + (page+1);
+				} else {
+					resp.paging.next = 'http://' + req.host + '/songs?=' + (page+1);
+				}
 			}
 			if (page-1 > -1) {
-				resp.paging.prev = 'http://localhost:3000/songs?p=' + (page-1);
+				if (req.host == 'localhost') {
+					resp.paging.prev = 'http://localhost:3000/songs?p=' + (page-1);
+				} else {
+					resp.paging.prev = 'http://' + req.host + '/songs?=' + (page-1);
+				}
 			}
 
 			collection.find({},opts).toArray(function(e,items) {
