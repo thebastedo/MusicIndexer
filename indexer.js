@@ -3,10 +3,10 @@ var fs 		= require('fs');
 		probe	= require('node-ffprobe');
 		http 	= require('http');
 
-//var _path = '/Users/justinbastedo/Desktop/testMusic';
+var _path = '/Users/justinbastedo/Desktop/testMusic';
 //var _path = '/Volumes/External/CLEANED_MUSIC';
 //var _path = '/Volumes/External/INCOMPLETE_MUSIC';
-var _path = '/Volumes/External/Music';
+//var _path = '/Volumes/External/Music';
 
 var _ignore = ['.DS_Store'];
 
