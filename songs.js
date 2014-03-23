@@ -1,21 +1,10 @@
-var Server	= require('mongodb').Server;
-		Db 			= require('mongodb').Db;
-		BSON		= require('mongodb').BSONPure;
+var musicdb	= require('./musicdb');	
 
-var server = new Server(process.env.OPENSHIFT_MONGODB_DB_HOST, parseInt(process.env.OPENSHIFT_MONGODB_DB_PORT), {auto_reconnect: true});
-db = new Db('music', server)
-
-db.open(function(err,db) {
-	if (err) { throw err; }
-	db.authenticate(process.env.OPENSHIFT_MONGODB_DB_USERNAME, process.env.OPENSHIFT_MONGODB_DB_PASSWORD, {authdb: "admin"}, function(err,res){
-		if (err) { throw err };
-		db.collection('songs', {strict:true}, function(err,collection){
-			if (err) {
-				db.ensureIndex('songs', {path:1}, {unique:true, background:true}, function(err,index) {
-				});
-			}
+db.collection('songs', {strict:true}, function(err,collection){
+	if (err) {
+		db.ensureIndex('songs', {path:1}, {unique:true, background:true}, function(err,index) {
 		});
-	});
+	}
 });
 
 exports.add = function(req,res) {
@@ -72,10 +61,10 @@ exports.getAll = function(req,res) {
 			};
 
 			if (page+1 < totalPages) {
-				resp.paging.next = 'http://music-thebastedo.rhcloud.com/songs?p=' + (page+1);
+				resp.paging.next = 'http://localhost:3000/songs?p=' + (page+1);
 			}
 			if (page-1 > -1) {
-				resp.paging.prev = 'http://music-thebastedo.rhcloud.com/songs?p=' + (page-1);
+				resp.paging.prev = 'http://localhost:3000/songs?p=' + (page-1);
 			}
 
 			collection.find({},opts).toArray(function(e,items) {

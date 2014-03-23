@@ -1,22 +1,11 @@
-var Server	= require('mongodb').Server;
-		Db 			= require('mongodb').Db;
-		BSON		= require('mongodb').BSONPure;
+var musicdb	= require('./musicdb');	
 
-var server = new Server(process.env.OPENSHIFT_MONGODB_DB_HOST, parseInt(process.env.OPENSHIFT_MONGODB_DB_PORT), {auto_reconnect: true});
-db = new Db('music', server)
-
-db.open(function(err,db) {
-	if (err) { throw err; }
-	db.authenticate(process.env.OPENSHIFT_MONGODB_DB_USERNAME, process.env.OPENSHIFT_MONGODB_DB_PASSWORD, {authdb: "admin"}, function(err,res){
-		if (err) { throw err };
-		db.collection('artists', {strict:true}, function(err,collection){
-			if (err) {
-				db.ensureIndex('artists', {artist:1}, {unique:true, background:true}, function(err,index) {
-					console.log("Created index: " + index);
-				});
-			}
+db.collection('artists', {strict:true}, function(err,collection){
+	if (err) {
+		db.ensureIndex('artists', {artist:1}, {unique:true, background:true}, function(err,index) {
+			console.log("Created index: " + index);
 		});
-	});
+	}
 });
 
 exports.add = function(req,res) {
